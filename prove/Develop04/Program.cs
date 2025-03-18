@@ -4,6 +4,7 @@ class Program
 {
     static void Main(string[] args)
     {
+        Console.Clear();
         Console.WriteLine("Welcome to the Mindfulness App!");
         Console.WriteLine("Please select an activity:");
         Console.WriteLine("1. Breathing Activity");
@@ -16,7 +17,7 @@ class Program
         switch (choice)
         {
             case "1":
-                BreathingActivity breathingActivity = new BreathingActivity();
+                BreathongActivity breathingActivity = new BreathongActivity();
                 breathingActivity.InteractBreathing();
                 break;
             case "2":
