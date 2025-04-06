@@ -10,7 +10,7 @@ class Order
     public decimal TotalCost()
     {
         decimal total = 0;
-        foreach (var product in _products)
+        foreach (Product product in _products)
         {
             total += product._price * product._quantity;
         }
@@ -29,7 +29,7 @@ class Order
     public string PackingLabel()
     {
         string packingLabel = "Packing Label:\n";
-        foreach (var product in _products)
+        foreach (Product product in _products)
         {
             packingLabel += $"{product._quantity} x {product._name} @ {product._price:C}\n";
         }
