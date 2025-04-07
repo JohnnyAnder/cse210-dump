@@ -1,0 +1,35 @@
+namespace Develop05;
+
+public class Fmanager
+{
+    public string _fname;
+    public List<string> _raw = new List<string>();
+    public Fmanager(string _fname)
+    {
+        this._fname = _fname;
+    }
+    
+
+    public void Load2Array()
+    {
+        using (StreamWriter w = File.AppendText(_fname));
+        using(StreamReader _fr = new StreamReader(_fname))
+        {
+            string _line;
+            while((_line = (_fr.ReadLine())) != null)
+            {
+                _raw.Add(_line);
+            }
+        }
+    }
+
+    public void Save2File(){
+        using(StreamWriter _fw = new StreamWriter(_fname))
+        {
+            foreach(string _line in _raw)
+            {
+                _fw.WriteLine(_line);
+            }
+        }
+    }
+}

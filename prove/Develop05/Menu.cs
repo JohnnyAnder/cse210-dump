@@ -1,64 +1,275 @@
+using Develop05;
+
 public class Menu
 {
+
     private List<Goal> _goals = new List<Goal>();
-    public void Display()
+    private int _points, _streak;
+    private string fname;
+    public Menu()
+    {
+        Console.WriteLine("Enter the file name to load: ");
+        fname = Console.ReadLine();
+        Fmanager _saveload = new Fmanager(fname);
+        ConvertPull();
+    }
+
+
+    public void Execute()
     {
         Console.Clear();
-        Console.WriteLine("Menu:");
-        Console.WriteLine("1. Create New Goal");
-        Console.WriteLine("2. List Goals");
-        Console.WriteLine("3. Save Goals");
-        Console.WriteLine("4. Load Goals");
-        Console.WriteLine("5. Display Goals");
-        Console.WriteLine("6. Quit");
-    }
-    public void save()
-    {
-        Console.WriteLine("Enter the filename to save the goals: ");
-        string filename = Console.ReadLine();
-        using (StreamWriter writer = new StreamWriter(filename))
+        Console.WriteLine("You have " + _points + " points, and a " + _streak + " day streak");
+        Console.WriteLine("Menu options:\n1. Create New Goal\n2. List Goals\n3. Save Goals\n4. Load Goals\n5. Record Event\n6. Change File" + 
+        "\n0. Quit");
+        switch(int.Parse(Console.ReadLine()))
         {
-            foreach (Goal goal in _goals)
-            {
-                writer.WriteLine($"{Goal._goal}:{Goal._description}|{Goal._points}");
-            }
+            case 0:
+                System.Environment.Exit(0);
+                break;
+            case 1:
+                
+
+                CreateGoal();
+                
+                break;
+            case 2:
+                Console.Clear();
+                Console.WriteLine("Goals: ");
+                ListGoals();
+                Console.ReadLine();
+                break;
+            case 3:
+                ConvertPush();
+                Console.Clear();
+                Console.WriteLine("File Saved!");
+                Console.ReadKey();
+                break;
+            case 4:
+
+                ConvertPull();
+                Console.Clear();
+                Console.WriteLine("File Loaded!");
+                Console.ReadKey();
+                break;
+            case 5:
+                RecordEvent();
+                break;
+            case 6:
+                Console.WriteLine("File name: ");
+                fname = Console.ReadLine();
+                break;
+            default:
+                break;
         }
-        Console.WriteLine("Goals saved successfully.");
     }
-    public void load()
+
+    private void CreateGoal()
     {
-        Console.WriteLine("Enter the filename to load the goals: ");
-        string filename = Console.ReadLine();
-        if (File.Exists(filename))
+        Console.Clear();
+        Console.WriteLine("Select one of the following goals:\n1. Simple Goal\n2. Eternal Goal\n3. Checklist Goal");
+        switch (int.Parse(Console.ReadLine()))
         {
-            using (StreamReader reader = new StreamReader(filename))
-            {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    string[] parts = line.Split(':');
-                    string goal = parts[0];
-                    string[] details = parts[1].Split('|');
-                    string description = details[0];
-                    int points = int.Parse(details[1]);
-                    Goal newGoal = new Goal(goal, description, points);
-                    _goals.Add(newGoal);
-                }
-            }
-            Console.WriteLine("Goals loaded successfully.");
+            case 1:
+                _goals.Add(new SimpleGoal());
+                break;
+            case 2: 
+                _goals.Add(new EternalGoal());
+                break;
+            case 3:
+                _goals.Add(new ChecklistGoal());
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void ListGoals()
+    {
+        for(int i = 0; i < _goals.Count(); i ++)
+        {
+            Console.Write((i+1) +". ");
+            Console.WriteLine(_goals[i].ToString());
+        }
+    }
+
+    private void RecordEvent()
+    {
+        Console.Clear();
+        ListGoals();
+        Console.WriteLine("Update a goal! Goal Number: ");
+        int _tmpIndex = int.Parse(Console.ReadLine()) - 1;
+        
+        if(_goals[_tmpIndex].IsComplete())
+        {
+            Console.WriteLine("Your Goal is already complete!");
+            Console.ReadKey();
         }
         else
         {
-            Console.WriteLine("File not found.");
-        }
-    }
-    public void DisplayGoals()
-    {
-        Console.Clear();
-        Console.WriteLine("Goals:");
-        foreach (Goal goal in _goals)
-        {
+            
+            _goals[_tmpIndex].UpdateGoal();
+            if(_goals[_tmpIndex].IsComplete())
+            {
+            _points += _goals[_tmpIndex].GetPoints();
+            Console.ReadKey();
+            }
+            else if(_goals[_tmpIndex].GetType() == 2)
+            {
+                _points += _goals[_tmpIndex].GetPoints();
+                Console.ReadKey();
+            }
             
         }
     }
+
+    public void ConvertPush()
+    {
+        
+       
+        Fmanager _fileManager = new Fmanager(fname);
+        
+        List<string> _rawList = new List<string>();
+
+        
+        foreach(Goal _g in _goals)
+        {
+            if(_g == _goals[0])
+            {
+                _rawList.Add("-->" + _streak + ":" + DateTime.UtcNow.ToShortDateString().Replace("/", ":"));
+                _rawList.Add("[");
+            }
+            string[] tmpdat = _g.PushInfo();
+            _rawList.Add(tmpdat[0]);
+            _rawList.Add(tmpdat[1]);
+            _rawList.Add(tmpdat[2]);
+            _rawList.Add(tmpdat[3]);
+            _rawList.Add(tmpdat[4]);
+            _rawList.Add(tmpdat[5]);
+
+            if(_g == _goals[_goals.Count - 1])
+            {
+                _rawList.Add("]");
+            }
+            else
+            {
+                _rawList.Add("][");
+            }
+        }
+
+        _fileManager._raw = _rawList;
+        _fileManager.Save2File();
+    }
+
+
+  
+    public void ConvertPull()
+    {
+       
+        Fmanager file_manager = new Fmanager(fname);
+        file_manager.Load2Array();
+       
+        _goals.Clear();
+
+        string type, title, description, count, total, points;
+        type = "";
+        title = "";
+        description = "";
+        count = "";
+        total = "";
+        points = "";
+
+        int i = -1;
+        foreach(string l in file_manager._raw)
+        {
+           
+            if(i == -1)
+            {
+                i = 0;
+                string tempstreak;
+                tempstreak = l[3..];
+                
+                string[] datetime = tempstreak.Split(":");
+                _streak = int.Parse(datetime[0]);
+
+
+                DateTime last = new DateTime(int.Parse(datetime[3]),int.Parse(datetime[1]), int.Parse(datetime[2]));
+
+                if(((DateTime.UtcNow - last).TotalHours > 24) && (DateTime.UtcNow - last).TotalHours < 48)
+                {
+                    _streak+=1;
+                }  
+                else if((DateTime.UtcNow - last).TotalHours < 48)
+                {
+                   
+                }
+                else
+                {
+                     _streak = 0;
+                }
+                
+            }
+           
+            if(l.Contains("["))
+            {
+                i = 0;
+            }
+            else
+            {
+                i += 1;
+                switch(i - 1)
+                {
+                    case 0:
+                        type = l;
+                        break;
+                    case 1:
+                        title = l;
+                        break;
+                    case 2:
+                        description = l;
+                        break;
+                    case 3:
+                        count = l;
+                        break;
+                    case 4:
+                        total = l;
+                        break;
+                    case 5:
+                        points = l;
+                        break;
+                    default:
+                        
+                        break;
+                }
+            }
+            
+            if(l.Contains("]"))
+            {
+                
+                Goal tempgoal = new SimpleGoal("DEBUG", "DEBUG","1", "1", "1");
+                
+                switch(int.Parse(type))
+                {
+                    case 1:
+                        tempgoal = new SimpleGoal(title, description, count, total, points);
+                        break;
+                    case 2:
+                        tempgoal = new EternalGoal(title, description, count, total, points);
+                        break;
+                    case 3:
+                        tempgoal = new ChecklistGoal(title, description, count, total, points);
+                        break;
+                    default:
+                        break;
+                }
+                
+                _goals.Add(tempgoal);
+            }
+        }
+
+        foreach(Goal _g in _goals)
+        {
+            this._points += _g.GetPoints();
+        }
+    }
+
 }

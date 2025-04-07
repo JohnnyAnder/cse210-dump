@@ -1,76 +1,72 @@
-public class Goal
+public abstract class Goal
 {
-   private string _goal;
-   private string _description;
-   private int _points;
-   private int _times;
-   private int _bonus;
-   public Goal(string goal, string description, int points, int times, int bonus)
-   {
-       _goal = goal;
-       _description = description;
-       _points = points;
-       _times = times;
-       _bonus = bonus;
-   }
-   public void DisplayGoalType()
-   {
-        Console.WriteLine("1. Simple Goal");
-        Console.WriteLine("2. Eternal Goal");
-        Console.WriteLine("3. Checklist Goal");
-   }
-   public void CreateGoal()
-   {
-        Console.Clear();
-        Console.WriteLine("Which type of goal would you like to create?");
-        DisplayGoalType();
-        string goalType = Console.ReadLine();
-        switch (goalType)
-        {
-            //1. Simple Goal
-            case "1":
-                Console.WriteLine("Enter the goal: ");
-                _goal = Console.ReadLine();
-                Console.WriteLine("Enter the description: ");
-                _description = Console.ReadLine();
-                Console.WriteLine("Enter the points: ");
-                _points = int.Parse(Console.ReadLine());
-                _times = 1;
-                _bonus = 0;
-                new Goal(_goal, _description, _points, _times, _bonus);
-                Console.WriteLine("Goal created successfully.");
-                break;
-            //2. Eternal Goal
-            case "2":
-                Console.WriteLine("Enter the goal: ");
-                _goal = Console.ReadLine();
-                Console.WriteLine("Enter the description: ");
-                _description = Console.ReadLine();
-                Console.WriteLine("Enter the points: ");
-                _points = int.Parse(Console.ReadLine());
-                _times = 0;
-                _bonus = 0;
-                new Goal(_goal, _description, _points, _times, _bonus);
-                Console.WriteLine("Goal created successfully.");
-                break;
-            //3. Checklist Goal
-            case "3":
-                Console.WriteLine("Enter the goal: ");
-                _goal = Console.ReadLine();
-                Console.WriteLine("Enter the description: ");
-                _description = Console.ReadLine();
-                Console.WriteLine("Enter the number of times the goal must be completed: ");
-                _times = int.Parse(Console.ReadLine());
-                Console.WriteLine("Enter the number of points for each time the goal is completed: ");
-                _points = int.Parse(Console.ReadLine());
-                Console.WriteLine("Enter the bonus points for completing the goal: ");
-                _bonus = int.Parse(Console.ReadLine());
-                new Goal(_goal, _description, _points, _times, _bonus);
-                Console.WriteLine("Goal created successfully.");
-                break;
-            default:
-                Console.WriteLine("Invalid choice. Please try again.");
-                break;
-        }
-   }
+protected int _count, _total, _points;
+protected string _title, _description;
+
+protected int _type;
+
+public Goal()
+{
+    _count = 0;
+}
+
+
+protected string CheckComplete()
+{
+    if(_count == _total)
+    {
+        return "[x]";
+    }
+    else
+    {
+        return "[ ]";
+    }
+}
+
+public bool IsComplete()
+{
+    return _count == _total;
+}
+
+public abstract void UpdateGoal();
+
+
+public virtual string ToString()
+{
+    return CheckComplete() + " " +  _title + " (" + _description + ")";
+}
+// {
+//     return _title + " " + _description + " " + _count + " out of " + _total;
+// }
+
+public int GetPoints()
+{
+    return _points;
+}
+
+public string GetTitle()
+{
+    return _title;
+}
+
+public string[] PushInfo()
+{
+    return [_type.ToString(), _title, _description, _count.ToString(), _total.ToString(), _points.ToString()];
+}
+
+public void PullInfo(string[] info)
+{
+    this._title = info[1];
+    this._description = info[2];
+    this._count = int.Parse(info[3]);
+    this._total = int.Parse(info[4]);
+    this._points = int.Parse(info[5]);
+    this._type = int.Parse(info[0]);
+}
+
+public int GetType()
+{
+    return _type;
+}
+
 }
