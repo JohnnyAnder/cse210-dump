@@ -21,7 +21,7 @@ public class Video
         Console.WriteLine($"Length: {_length} seconds");
         Console.WriteLine($"Number of Comments: {CommentCalc()}");
         Console.WriteLine("Comments:");
-        foreach (var comment in _Comments)
+        foreach (Comment comment in _Comments)
         {
             comment.DisplayComment();
         }
